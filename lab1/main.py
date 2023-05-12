@@ -16,24 +16,24 @@ class minstModel(nn.Module):
             nn.Linear(inputSize*inputSize, inputSize*4),
             nn.LeakyReLU()
         )
-        self.linear2 = nn.Sequential(
-            nn.Linear(inputSize*4, inputSize*2),
-            nn.LeakyReLU()
-        )
+        # self.linear2 = nn.Sequential(
+        #     nn.Linear(inputSize*4, inputSize*2),
+        #     nn.LeakyReLU()
+        # )
         self.linear3 = nn.Sequential(
-            nn.Linear(inputSize*2, labelCnt),
+            nn.Linear(inputSize*4, labelCnt),
             nn.LeakyReLU()
         )
 
     def forward(self, img):
         img = self.linear1(img)
-        img = self.linear2(img)
+        # img = self.linear2(img)
         img = self.linear3(img)
         
         return img
 
 class trainer:
-    def __init__(self, inputSize=28, labelCnt=10, lr=0.001, batchSize = 8, device='cpu'):
+    def __init__(self, inputSize=28, labelCnt=10, lr=0.01, batchSize = 8, device='cpu'):
         # 定义参数
         self.lr = lr
         self.batchSize = batchSize
@@ -47,7 +47,7 @@ class trainer:
         self.model = minstModel(inputSize, labelCnt).to(self.device)
         self.optim = torch.optim.Adam(self.model.parameters(),lr=self.lr)
         self.criterion = nn.CrossEntropyLoss().to(self.device)
-        self.scheduler = MultiStepLR(self.optim, milestones=[5, 10, 15, 20, 25], gamma=0.8) 
+        self.scheduler = MultiStepLR(self.optim, milestones=[5, 10, 15, 20, 25], gamma=1.0) 
         
         # 加载数据
         self.trainDataset = datasets.MNIST('./data', train=True, transform=transforms.ToTensor(), download=True)
