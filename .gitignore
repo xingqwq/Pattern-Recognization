@@ -4,3 +4,11 @@
 *.jpeg
 *.jpg
 *.bmp
+*.zip
+*.csv
+*.tar.gz
+*.tar
+*.rar
+*.pt
+*.pkl
+__pycache__
