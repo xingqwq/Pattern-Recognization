@@ -7,6 +7,7 @@
 *.zip
 *.csv
 *.tar.gz
+*.tar.xz
 *.tar
 *.rar
 *.pt
