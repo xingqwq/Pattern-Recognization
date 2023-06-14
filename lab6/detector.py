@@ -1,3 +1,4 @@
+from PySide6.QtCore import QThread, Signal
 import cv2 as cv
 from openvino.runtime import Core
 import numpy as np
@@ -7,10 +8,11 @@ from tracker import faceItem, tracker, track
 from ultralytics.yolo.utils import ROOT, yaml_load
 from ultralytics.yolo.utils.checks import check_yaml
 
-class detector:
-    def __init__(self, cameraID = 0, updateFun = None):
-        self.cameraID = cameraID
-        self.updateFun = updateFun
+class detector(QThread):
+    conSignal = Signal(np.ndarray, int, int, list)
+    def __init__(self, cameraID = 0):
+        super(detector, self).__init__()
+        self.cameraID = 1
         self.grabStatus = 0
         self.id2class = yaml_load(check_yaml('data.yaml'))['names']
         self.cnt = 0
@@ -58,8 +60,8 @@ class detector:
         cv.rectangle(img, (x, y), (x_plusW, y_plusH), color, 2)
         cv.putText(img, label, (x - 10, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-    def grab(self):
-        camera = cv.VideoCapture(self.cameraID)
+    def run(self):
+        camera = cv.VideoCapture("/dev/video2")
         self.grabStatus = 1
         while self.grabStatus:
             ret, frame = camera.read()
@@ -91,11 +93,12 @@ class detector:
                 i = self.faceTracker.tracks[id]
                 if i.status == 0:
                     continue
-                noMaskInfo.append("脸部ID: {}\n 当前是否佩戴口罩: {}\n 置信度:{}\n\n".format(
-                            id,
-                            "已正确佩戴" if i.isMask == 0 else "未佩戴",
-                            (i.maskStatus[0] / sum(i.maskStatus)) if i.isMask == 0 else  (i.maskStatus[1] / sum(i.maskStatus))
-                        ))
+                if sum(i.maskStatus) >= 5:
+                    noMaskInfo.append("脸部ID: {}\n当前是否佩戴口罩: {}\n置信度:{}\n\n".format(
+                                id,
+                                "已正确佩戴" if i.isMask == 0 else "未佩戴",
+                                (i.maskStatus[0] / (sum(i.maskStatus)+1)) if i.isMask == 0 else  (i.maskStatus[1] / (sum(i.maskStatus)+1))
+                            ))
                 if i.isMask == 1:
                     noMask += 1
                 if i.isUpdate == 1:
@@ -117,7 +120,7 @@ class detector:
                 self.fps = 1/(self.timeTotal/(self.cnt-1))
                 self.timeTotal = 0
                 self.cnt = 0
-            self.updateFun(img, self.fps, noMask, noMaskInfo)
+            self.conSignal.emit(img, self.fps, noMask, noMaskInfo)
         # camera.release()
         # cv.destroyAllWindows()
     

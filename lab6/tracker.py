@@ -50,7 +50,7 @@ class tracker:
                 for j in range(0, len(faceList)):
                     if self.tracks[i].status != 0:
                         tmpDist = utils.calDist(self.tracks[i].faceQueue[-1], faceList[j])
-                        if tmpDist <= 120:
+                        if tmpDist <= 300:
                             costMat[i][j] = tmpDist
                         else:
                             costMat[i][j] = 999
@@ -90,6 +90,6 @@ class tracker:
                 self.tracks[i].clear()
             # 每两秒清除一次状态
             if sum(self.tracks[i].maskStatus) >= 40:
-                self.maskStatus = [0, 0]
+                self.tracks[i].maskStatus = [0, 0]
 
                 

@@ -2,6 +2,7 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QInputDialog, QLabel, QWidget, QVBoxLayout
 from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtCore import QThread, Signal
 import cv2 as cv
 import threading
 import time
@@ -12,7 +13,10 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
+        self.detectorPtr = detector(1)
+        self.detectorPtr.conSignal.connect(self.setPic)
         self.ui.setupUi(self)
+        self.detectorPtr.start()
         
     def setPic(self, img, fps, noMask, noMaskInfo):
         img = QImage(img, img.shape[1], img.shape[0], QImage.Format.Format_RGB888)
@@ -28,10 +32,8 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ui = MainWindow()
-    detectorPtr = detector(updateFun=ui.setPic)
-    grabThread = threading.Thread(target=detectorPtr.grab)
     ui.show()
-    grabThread.start()
     # 关闭线程
     app.exec()
-    detectorPtr.closeGrab()
+    ui.detectorPtr.closeGrab()
+    time.sleep(5)
