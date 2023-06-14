@@ -1,0 +1,13 @@
+train: /home/hitcrt/Documents/ultralytics-main/mask/train/images
+val: /home/hitcrt/Documents/ultralytics-main/mask/valid/images
+test: /home/hitcrt/Documents/ultralytics-main/mask/test/images
+
+nc: 2
+names: ['mask', 'no-mask']
+
+roboflow:
+  workspace: joseph-nelson
+  project: mask-wearing
+  version: 19
+  license: Public Domain
+  url: https://universe.roboflow.com/joseph-nelson/mask-wearing/dataset/19
